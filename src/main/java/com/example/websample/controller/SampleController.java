@@ -9,8 +9,12 @@ import org.springframework.web.bind.annotation.*;
 public class SampleController {
 
     @GetMapping("/order/{orderId}")
-    public String getOrder(@PathVariable("orderId") String id) {
-        log.info("Get some order : " + id);
+    public String getOrder(@PathVariable("orderId") String id) throws IllegalAccessException {
+        log.info("Get some order : " + id + " thread : " + Thread.currentThread());
+
+        if(Integer.parseInt(id) > 500) {
+            throw new IllegalAccessException("orderId is too big");
+        }
         return "orderId:" + id + ", " + "orderAmount:1000";
     }
 
