@@ -1,7 +1,12 @@
 package com.example.websample.controller;
 
+import com.example.websample.dto.ErrorResponse;
+import com.example.websample.exception.WebSampleException;
+import lombok.AllArgsConstructor;
 import lombok.Data;
 import lombok.extern.slf4j.Slf4j;
+import org.springframework.http.HttpStatus;
+import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
 @Slf4j
@@ -15,6 +20,15 @@ public class SampleController {
         if ("500".equals(id)) {
             throw new IllegalAccessException("500 is not valid orderId.");
         }
+
+        if ("700".equals(id)) {
+            throw new ArithmeticException("500 is not valid orderId.");
+        }
+
+        if("900".equals(id)) {
+            throw new WebSampleException("900 Error", "900 input inserted.");
+        }
+
         return "orderId:" + id + ", " + "orderAmount:1000";
     }
 
@@ -48,7 +62,28 @@ public class SampleController {
         return "order created -> orderId:1, orderAmount:1000";
     }
 
+    @ResponseStatus(value = HttpStatus.FORBIDDEN)
+    @ExceptionHandler(IllegalAccessException.class)
+    public ErrorResponse handleIllegalAccessException(IllegalAccessException e) {
+        log.error("Illegal Exception : ", e);
+
+        return new ErrorResponse("ACCESS_DENIED", "Illegal Exception occurred.");
+    }
+
+    @ExceptionHandler(Exception.class)
+    public ResponseEntity<ErrorResponse> handleException(Exception e) {
+        log.error("Internal Server Exception : ", e);
+
+        return ResponseEntity
+                .status(HttpStatus.INTERNAL_SERVER_ERROR)
+                .body(new ErrorResponse(
+                        "INTERNAL_SERVER_ERROR",
+                        "Illegal Exception occurred."
+                ));
+    }
+
     @Data
+    @AllArgsConstructor
     public static class CreateOrderRequest {
         private String orderId;
         private Integer orderAmount;
